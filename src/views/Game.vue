@@ -64,11 +64,11 @@ const getSanta = async () => {
     const randomIndex = Math.floor(Math.random() * candidates.length)
     const selectedUser = candidates[randomIndex]
 
-    // === FIX: Явная проверка для TypeScript ===
+
     if (!selectedUser) {
       throw new Error('Ошибка выбора кандидата (внутренняя ошибка).')
     }
-    // ==========================================
+
 
     await runTransaction(db, async (transaction) => {
       const selectedRef = doc(db, 'users', selectedUser.id)
@@ -179,12 +179,13 @@ h1 {
       0 4px 10px rgba(255,255,255,0.9),
       0 0 30px rgba(255,255,255,0.7);
   font-weight: 700 !important;
-  font-size: 2rem !important;
+  font-size: 2.5rem !important;
   line-height: 1;
 }
 
 input {
   width: 100%;
+  height: 50px;
   padding: 12px;
   font-size: 1.6rem;
   background: rgba(255, 255, 255, 0.5);
@@ -194,11 +195,11 @@ input {
   box-sizing: border-box;
   outline: none;
   text-align: center;
-  color: #1a4d2e;
+  color: #181818;
   transition: all 0.3s ease;
 }
 
-input::placeholder { color: rgba(22, 91, 51, 0.6); font-size: 1.5rem; }
+input::placeholder { color: black; font-size: 1.5rem; }
 input:focus {
   border-color: var(--green);
   background: rgba(255, 255, 255, 0.85);
@@ -207,8 +208,9 @@ input:focus {
 
 .xmas-btn {
   width: 100%;
+  height: 50px;
   padding: 12px;
-  font-size: 1rem;
+  font-size: 1.4rem;
   background: var(--green);
   color: white;
   border: none;
@@ -227,9 +229,8 @@ input:focus {
 .xmas-btn:active { transform: translateY(1px); box-shadow: 0 2px 10px rgba(22, 91, 51, 0.3); }
 .xmas-btn:disabled { background: #6c8c7a; box-shadow: none; transform: none; opacity: 0.7; cursor: not-allowed; }
 
-/* Результат */
+
 .result {
-  /* Убрал верхний border, так как теперь это единственный контент */
   margin-top: 1rem;
 }
 

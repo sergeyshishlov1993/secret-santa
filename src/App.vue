@@ -125,7 +125,6 @@ h2 {
   z-index: 10;
   width: 100%;
   max-width: 400px;
-  padding: 20px;
 }
 
 @media (max-width: 768px) {
