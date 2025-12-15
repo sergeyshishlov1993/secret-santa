@@ -1,3 +1,5 @@
+
+
 <script setup lang="ts">
 import { ref } from 'vue'
 import { collection, getDocs, runTransaction, doc } from 'firebase/firestore'
@@ -12,17 +14,48 @@ interface User {
   santaId?: string
 }
 
-const name = ref('')
-const target = ref<string | null>(null)
-const error = ref('')
-const loading = ref(false)
+type SnowflakeStyle = Record<'--left' | '--size' | '--duration' | '--delay' | '--opacity', string>
 
-const getNormalizedSurname = (fullName: string) => {
+const name = ref<string>('')
+const target = ref<string | null>(null)
+const error = ref<string>('')
+const loading = ref<boolean>(false)
+
+const getNormalizedSurname = (fullName: string): string => {
   const surname = fullName.trim().split(/\s+/).pop()?.toLowerCase() || ''
   return surname.replace(/(ая|яя|ый|ий|ой|а|я)$/, '')
 }
 
-const getSanta = async () => {
+const createSnowflakes = (count: number): SnowflakeStyle[] => {
+  let seed = 123456789
+  const next = (): number => {
+    seed = (seed * 1664525 + 1013904223) % 4294967296
+    return seed / 4294967296
+  }
+
+  const snowflakes: SnowflakeStyle[] = []
+  for (let index = 0; index < count; index += 1) {
+    const leftPercent = Math.round(next() * 100)
+    const sizePixels = 2 + Math.round(next() * 5)
+    const durationSeconds = 6 + Math.round(next() * 8)
+    const delaySeconds = -Math.round(next() * durationSeconds)
+    const opacityValue = (0.35 + next() * 0.55).toFixed(2)
+
+    snowflakes.push({
+      '--left': `${leftPercent}%`,
+      '--size': `${sizePixels}px`,
+      '--duration': `${durationSeconds}s`,
+      '--delay': `${delaySeconds}s`,
+      '--opacity': `${opacityValue}`
+    })
+  }
+
+  return snowflakes
+}
+
+const snowflakes = ref<SnowflakeStyle[]>(createSnowflakes(36))
+
+const getSanta = async (): Promise<void> => {
   const inputName = name.value.trim().toLowerCase()
   if (!inputName) return
 
@@ -36,7 +69,6 @@ const getSanta = async () => {
     const allUsers = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as User))
 
     const me = allUsers.find(u => u.name.trim().toLowerCase() === inputName)
-
     if (!me) {
       throw new Error('Вас нет в списке участников! Попросите админа добавить вас.')
     }
@@ -64,11 +96,9 @@ const getSanta = async () => {
     const randomIndex = Math.floor(Math.random() * candidates.length)
     const selectedUser = candidates[randomIndex]
 
-
     if (!selectedUser) {
       throw new Error('Ошибка выбора кандидата (внутренняя ошибка).')
     }
-
 
     await runTransaction(db, async (transaction) => {
       const selectedRef = doc(db, 'users', selectedUser.id)
@@ -85,7 +115,6 @@ const getSanta = async () => {
     })
 
     target.value = selectedUser.name
-
   } catch (e: unknown) {
     if (e instanceof Error) error.value = e.message
   } finally {
@@ -96,6 +125,9 @@ const getSanta = async () => {
 
 <template>
   <div class="card">
+    <div class="snow" aria-hidden="true">
+      <span v-for="(styleVars, index) in snowflakes" :key="index" class="snowflake" :style="styleVars" />
+    </div>
 
     <div v-if="!target">
       <div class="header-row">
@@ -112,11 +144,7 @@ const getSanta = async () => {
         />
       </div>
 
-      <button
-          class="xmas-btn"
-          @click="getSanta"
-          :disabled="!name || loading"
-      >
+      <button class="xmas-btn" @click="getSanta" :disabled="!name || loading">
         {{ loading ? '🎄 Поиск...' : '🎁 Кто мне выпал ?' }}
       </button>
     </div>
@@ -135,6 +163,8 @@ const getSanta = async () => {
 
 <style scoped>
 .card {
+  position: relative;
+  overflow: hidden;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -148,7 +178,45 @@ const getSanta = async () => {
   margin: 0 auto;
 }
 
+.snow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.snowflake {
+  position: absolute;
+  top: -12px;
+  left: var(--left);
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 1);
+  opacity: var(--opacity);
+  animation-name: snow-fall, snow-drift;
+  animation-duration: var(--duration), calc(var(--duration) * 0.7);
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+  animation-delay: var(--delay), var(--delay);
+  filter: drop-shadow(0 2px 6px rgba(255, 255, 255, 0.25));
+}
+
+@keyframes snow-fall {
+  to {
+    transform: translateY(520px);
+  }
+}
+
+@keyframes snow-drift {
+  0% { margin-left: 0; }
+  50% { margin-left: 14px; }
+  100% { margin-left: 0; }
+}
+
 .header-row {
+  position: relative;
+  z-index: 1;
   width: 100%;
   display: flex;
   align-items: center;
@@ -171,6 +239,8 @@ const getSanta = async () => {
 }
 
 h1 {
+  position: relative;
+  z-index: 1;
   font-family: 'Mountains of Christmas', cursive !important;
   color: var(--green);
   margin: 0;
@@ -181,6 +251,11 @@ h1 {
   font-weight: 700 !important;
   font-size: 2.5rem !important;
   line-height: 1;
+}
+
+.input-group {
+  position: relative;
+  z-index: 1;
 }
 
 input {
@@ -199,7 +274,11 @@ input {
   transition: all 0.3s ease;
 }
 
-input::placeholder { color: black; font-size: 1.5rem; }
+input::placeholder {
+  color: black;
+  font-size: 1.5rem;
+}
+
 input:focus {
   border-color: var(--green);
   background: rgba(255, 255, 255, 0.85);
@@ -207,6 +286,8 @@ input:focus {
 }
 
 .xmas-btn {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 50px;
   padding: 12px;
@@ -226,11 +307,22 @@ input:focus {
   box-shadow: 0 6px 20px rgba(22, 91, 51, 0.5);
 }
 
-.xmas-btn:active { transform: translateY(1px); box-shadow: 0 2px 10px rgba(22, 91, 51, 0.3); }
-.xmas-btn:disabled { background: #6c8c7a; box-shadow: none; transform: none; opacity: 0.7; cursor: not-allowed; }
+.xmas-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(22, 91, 51, 0.3);
+}
 
+.xmas-btn:disabled {
+  background: #6c8c7a;
+  box-shadow: none;
+  transform: none;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
 
 .result {
+  position: relative;
+  z-index: 1;
   margin-top: 1rem;
 }
 
@@ -253,6 +345,8 @@ input:focus {
 }
 
 .error {
+  position: relative;
+  z-index: 1;
   margin-top: 1.5rem;
   color: #fff;
   background: rgba(212, 36, 38, 0.8);
