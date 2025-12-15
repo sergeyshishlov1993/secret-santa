@@ -311,7 +311,7 @@ const getNormalizedSurname = (fullName: string) => {
 }
 
 const getSanta = async () => {
-  const inputName = name.value.trim().toLowerCase() // 1. Сразу приводим ввод к нижнему регистру
+  const inputName = name.value.trim().toLowerCase()
   if (!inputName) return
 
   loading.value = true
@@ -319,13 +319,10 @@ const getSanta = async () => {
   target.value = null
 
   try {
-    // Сначала получаем ВСЕХ пользователей, чтобы найти себя без учета регистра
-    // (Firestore не умеет искать case-insensitive из коробки, поэтому делаем это в JS)
     const usersRef = collection(db, 'users')
     const snapshot = await getDocs(usersRef)
     const allUsers = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as User))
 
-    // 2. Ищем себя в списке (сравниваем lowerCase имена)
     const me = allUsers.find(u => u.name.trim().toLowerCase() === inputName)
 
     if (!me) {
@@ -335,21 +332,14 @@ const getSanta = async () => {
     const mySurnameRoot = getNormalizedSurname(me.name)
     const whoDrewMe = me.santaId
 
-    // 3. Фильтруем кандидатов из того же списка
     const candidates = allUsers.filter(u => {
-      // Исключаем занятых
       if (u.taken) return false
 
       const candidateNameFull = u.name.trim().toLowerCase()
       const candidateSurnameRoot = getNormalizedSurname(u.name)
 
-      // Правило 1: Не я сам
       if (candidateNameFull === inputName) return false
-
-      // Правило 2: Не однофамильцы
       if (candidateSurnameRoot === mySurnameRoot && mySurnameRoot.length > 2) return false
-
-      // Правило 3: Анти-кольцо
       if (whoDrewMe && u.id === whoDrewMe) return false
 
       return true
@@ -359,11 +349,15 @@ const getSanta = async () => {
       throw new Error('Нет доступных участников! Похоже, вы последний или остались только родственники.')
     }
 
-    // Выбираем кандидата
     const randomIndex = Math.floor(Math.random() * candidates.length)
     const selectedUser = candidates[randomIndex]
 
-    // 4. Выполняем транзакцию только для записи (проверка на гонку)
+    // === FIX: Явная проверка для TypeScript ===
+    if (!selectedUser) {
+      throw new Error('Ошибка выбора кандидата (внутренняя ошибка).')
+    }
+    // ==========================================
+
     await runTransaction(db, async (transaction) => {
       const selectedRef = doc(db, 'users', selectedUser.id)
       const freshDoc = await transaction.get(selectedRef)
