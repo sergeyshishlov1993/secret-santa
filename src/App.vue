@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 import bgDesktop from './assets/1.png'
 import bgMobile from './assets/2.png'
@@ -28,8 +27,6 @@ document.head.appendChild(link)
 </template>
 
 <style>
-
-
 :root {
   --red: #D42426;
   --green: #165B33;
@@ -55,13 +52,12 @@ body {
   cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><text y="20" font-size="20">🍭</text></svg>'), auto;
 }
 
-
 input, button, textarea, select {
   font-family: 'Comic Neue', cursive, sans-serif !important;
   font-weight: 700 !important;
   font-size: 1.5rem;
   letter-spacing: 0.5px;
-
+  font-style: normal;
 
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -70,21 +66,31 @@ input, button, textarea, select {
   border-radius: 16px;
 }
 
-
-
-
 h1 {
   font-family: 'Mountains of Christmas', cursive, serif !important;
   font-weight: 700 !important;
   font-size: 3.5rem !important;
   letter-spacing: 2px;
+  font-style: normal;
 }
 
-/* Остальные заголовки Comic Neue */
 h2 {
   font-family: 'Comic Neue', cursive, sans-serif !important;
   font-weight: 700 !important;
   font-size: 3rem !important;
+  font-style: normal;
+}
+
+@media (max-width: 768px) {
+  body,
+  input,
+  button,
+  textarea,
+  select,
+  h1,
+  h2 {
+    font-style: normal !important;
+  }
 }
 </style>
 
