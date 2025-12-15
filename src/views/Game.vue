@@ -152,7 +152,7 @@ const getSanta = async (): Promise<void> => {
     <div v-else class="result fade-in">
       <img :src="logoImg" alt="Secret Santa" class="logo1" />
       <p>Ты — Тайный Санта для:</p>
-      <h2>{{ target }}</h2>
+      <h2 class="target-name">{{ target }}</h2>
     </div>
 
     <div v-if="error" class="error shake">
@@ -218,15 +218,36 @@ const getSanta = async (): Promise<void> => {
   position: relative;
   z-index: 1;
   width: 100%;
+  flex-direction: column;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 5px;
   margin-bottom: 1rem;
 }
 
+.target-name {
+  display: inline-block;
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 1.1;
+
+  background-image: url('@/assets/images.jpeg');
+  background-size: cover;
+  background-position: center;
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+
+  -webkit-text-stroke: 1px #fff;
+
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+
 .logo {
-  max-width: 90px;
+  max-width: 110px;
   height: auto;
   filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
 }
@@ -249,7 +270,7 @@ h1 {
       0 4px 10px rgba(255,255,255,0.9),
       0 0 30px rgba(255,255,255,0.7);
   font-weight: 700 !important;
-  font-size: 2.5rem !important;
+  font-size: 4rem !important;
   line-height: 1;
 }
 
