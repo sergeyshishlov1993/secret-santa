@@ -166,8 +166,8 @@ const getSanta = async (): Promise<void> => {
   position: relative;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
   padding: 1rem;
@@ -222,7 +222,7 @@ const getSanta = async (): Promise<void> => {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .logo {
