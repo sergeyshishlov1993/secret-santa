@@ -140,7 +140,7 @@ const getSanta = async () => {
   -webkit-backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
+  padding: 1rem;
   border-radius: 24px;
   text-align: center;
   max-width: 90%;
@@ -149,6 +149,7 @@ const getSanta = async () => {
 }
 
 .header-row {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
