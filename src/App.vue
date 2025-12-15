@@ -176,15 +176,16 @@ document.head.appendChild(link)
 }
 
 
-
 html, body, #app {
-  height: 100%;
-  min-height: 100vh;
+
   margin: 0;
   padding: 0;
-  overflow: hidden;
-}
 
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 body {
   background-color: var(--red);
@@ -239,20 +240,23 @@ h2 {
 
 <style scoped>
 .app-layout {
-  height: 100vh;
+
+  min-height: 100vh;
   width: 100%;
   position: relative;
+
 
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+
 
   background-repeat: no-repeat;
   background-position: center center;
   background-size: cover;
   background-attachment: fixed;
   background-image: var(--bg-desktop);
+  padding: 10px;
 }
 
 .overlay {
