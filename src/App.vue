@@ -175,13 +175,13 @@ document.head.appendChild(link)
   box-sizing: border-box;
 }
 
-
 html, body, #app {
-
+  height: 100vh;
+  width: 100%;
   margin: 0;
   padding: 0;
-
-  height: 100%;
+  overflow: hidden;
+  overscroll-behavior-y: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -240,17 +240,13 @@ h2 {
 
 <style scoped>
 .app-layout {
-
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
   position: relative;
-
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-
+  overflow: hidden;
   background-repeat: no-repeat;
   background-position: center center;
   background-size: cover;
@@ -274,6 +270,8 @@ h2 {
   z-index: 10;
   width: 100%;
   max-width: 400px;
+  max-height: 100%;
+  overflow-y: auto;
 }
 
 @media (max-width: 768px) {
