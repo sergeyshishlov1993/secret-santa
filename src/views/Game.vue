@@ -179,7 +179,7 @@ h1 {
       0 4px 10px rgba(255,255,255,0.9),
       0 0 30px rgba(255,255,255,0.7);
   font-weight: 700 !important;
-  font-size: 3rem !important;
+  font-size: 2rem !important;
   line-height: 1;
 }
 

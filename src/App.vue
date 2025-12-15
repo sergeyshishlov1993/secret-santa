@@ -44,20 +44,21 @@ body {
   margin: 0;
   padding: 0;
   background-color: var(--red);
-  font-family: 'Comic Neue', cursive, sans-serif;
+  font-family: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 20px;
   box-sizing: border-box;
   scroll-behavior: smooth;
   overscroll-behavior: none;
   cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><text y="20" font-size="20">🍭</text></svg>'), auto;
+  font-style: normal;
 }
 
 input, button, textarea, select {
-  font-family: 'Comic Neue', cursive, sans-serif !important;
-  font-weight: 700 !important;
+  font-family: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-weight: 600 !important;
   font-size: 1.5rem;
   letter-spacing: 0.5px;
-  font-style: normal;
+  font-style: normal !important;
 
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -75,10 +76,10 @@ h1 {
 }
 
 h2 {
-  font-family: 'Comic Neue', cursive, sans-serif !important;
+  font-family: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
   font-weight: 700 !important;
   font-size: 3rem !important;
-  font-style: normal;
+  font-style: normal !important;
 }
 
 @media (max-width: 768px) {
