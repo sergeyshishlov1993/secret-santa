@@ -393,8 +393,6 @@
 <!--}-->
 <!--</style>-->
 
-
-
 <script setup lang="ts">
 import { ref } from 'vue'
 import { collection, getDocs, runTransaction, doc } from 'firebase/firestore'
@@ -469,7 +467,6 @@ const getSanta = async (): Promise<void> => {
       throw new Error('Вас нет в списке участников! Попросите админа добавить вас.')
     }
 
-    // Блокировка: Если пользователь уже выбрал, показываем результат и выходим
     if (me.drawnTargetName) {
       target.value = me.drawnTargetName
       return
@@ -478,44 +475,49 @@ const getSanta = async (): Promise<void> => {
     const mySurnameRoot = getNormalizedSurname(me.name)
     const whoDrewMe = me.santaId
 
-    // Попытка 1: Строгие правила (нет родственников, нет пар "меня выбрал")
-    let candidates = allUsers.filter(u => {
-      if (u.taken) return false // Исключаем, только если уже был выбран
+    let candidates: User[] = []
 
-      const candidateNameFull = u.name.trim().toLowerCase()
-      const candidateSurnameRoot = getNormalizedSurname(u.name)
+    const thoseWhoNotPlayedYet = allUsers.filter(u => !u.drawnTargetName)
 
-      if (candidateNameFull === inputName) return false
-      if (candidateSurnameRoot === mySurnameRoot && mySurnameRoot.length > 2) return false
-      if (whoDrewMe && u.id === whoDrewMe) return false
+    if (thoseWhoNotPlayedYet.length === 2) {
+      const theOtherPersonWhoNotPlayed = thoseWhoNotPlayedYet.find(u => u.id !== me.id)
+      if (theOtherPersonWhoNotPlayed && !theOtherPersonWhoNotPlayed.taken) {
+        candidates = [theOtherPersonWhoNotPlayed]
+      }
+    }
 
-      return true
-    })
-
-    // Попытка 2: Ослабление правил (разрешаем родственников и пары, если нет других вариантов)
     if (candidates.length === 0) {
       candidates = allUsers.filter(u => {
-        if (u.taken) return false // Исключаем, только если уже был выбран
-
+        if (u.taken) return false
         const candidateNameFull = u.name.trim().toLowerCase()
+        const candidateSurnameRoot = getNormalizedSurname(u.name)
 
         if (candidateNameFull === inputName) return false
-
-        // Разрешаем пару A <-> B (убрана проверка whoDrewMe)
-
+        if (candidateSurnameRoot === mySurnameRoot && mySurnameRoot.length > 2) return false
+        if (whoDrewMe && u.id === whoDrewMe) return false
         return true
       })
 
       if (candidates.length === 0) {
-        throw new Error('Нет доступных участников! Похоже, вы последний.')
+        candidates = allUsers.filter(u => {
+          if (u.taken) return false
+          const candidateNameFull = u.name.trim().toLowerCase()
+          if (candidateNameFull === inputName) return false
+          return true
+        })
       }
+    }
+
+    if (candidates.length === 0) {
+      throw new Error('Нет доступных участников!')
     }
 
     const randomIndex = Math.floor(Math.random() * candidates.length)
     const selectedUser = candidates[randomIndex]
 
+    // ФИКС ОШИБКИ:
     if (!selectedUser) {
-      throw new Error('Ошибка выбора кандидата (внутренняя ошибка).')
+      throw new Error('Ошибка: кандидат не определен.')
     }
 
     await runTransaction(db, async (transaction) => {
@@ -525,28 +527,24 @@ const getSanta = async (): Promise<void> => {
       const freshDoc = await transaction.get(selectedRef)
       const freshMe = await transaction.get(myRef)
 
-      // Проверка на race condition:
       if (!freshDoc.exists() || freshDoc.data().taken) {
-        throw new Error('Эльфы не успели, кто-то перехватил кандидата! Жми кнопку еще раз.')
+        throw new Error('Эльфы не успели, кто-то перехватил кандидата!')
       }
 
       if (!freshMe.exists()) {
-        throw new Error('Ваш пользовательский документ не найден.')
+        throw new Error('Ваш пользователь не найден.')
       }
 
       const myData = freshMe.data() as User
-      // Блокировка 2: Если транзакция обнаружит, что пользователь уже успел выбрать
       if (myData.drawnTargetName) {
-        throw new Error('Вы уже получили своего Санту в другом окне/сессии.')
+        throw new Error('Вы уже получили своего Санту.')
       }
 
-      // Обновляем выбранного участника (получателя подарка):
       transaction.update(selectedRef, {
         taken: true,
         santaId: me.id
       })
 
-      // Обновляем текущего участника (дарителя):
       transaction.update(myRef, {
         drawnTargetName: selectedUser.name
       })
@@ -592,12 +590,9 @@ const getSanta = async (): Promise<void> => {
       <img :src="logoImg" alt="Secret Santa" class="logo1" />
       <p>Ты — Тайный Санта для:</p>
       <h2 class="target-name">{{ target }}</h2>
-      <div v-if="error" class="error shake" style="margin-top: 10px;">
-        {{ error }}
-      </div>
     </div>
 
-    <div v-if="error && !target" class="error shake">
+    <div v-if="error" class="error shake">
       {{ error }}
     </div>
   </div>
@@ -834,3 +829,4 @@ input:focus {
   100% { transform: translateX(0); }
 }
 </style>
+
